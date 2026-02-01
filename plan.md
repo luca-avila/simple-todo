@@ -54,4 +54,4 @@ Three views:
 ---
 
 ## Current Step
-Not started.
+Step 1 complete. Ready for Step 2 (Login Page).
