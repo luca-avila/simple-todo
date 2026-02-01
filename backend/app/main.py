@@ -5,7 +5,8 @@ from sqlalchemy import text
 
 from app.database import Base, engine
 from app.models.user import User  # noqa: F401 - needed for metadata
-from app.routers import auth
+from app.models.task import Task  # noqa: F401 - needed for metadata
+from app.routers import auth, tasks
 
 
 @asynccontextmanager
@@ -18,6 +19,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Simple Todo API", version="0.1.0", lifespan=lifespan)
 
 app.include_router(auth.router)
+app.include_router(tasks.router)
 
 
 @app.get("/health")
