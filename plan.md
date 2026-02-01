@@ -1,106 +1,57 @@
-# Project Overview
+# Frontend Short-Term Plan
 
-This is a solo-built Todo application.
-
-Primary goals:
-- Practice a vibe-coding workflow
-- Build a clean, production-style monolith
-- Learn by reading and refactoring AI-generated code
-- Ship something deployable
-
-Secondary goals:
-- Keep scope small
-- Avoid premature complexity
-- Optimize for clarity over features
+Goal: Build a minimal Vue frontend for the existing backend.
 
 ---
 
-# Tech Stack (Decisions Locked)
+## Scope
 
-- Backend: FastAPI
-- Database: PostgreSQL
-- ORM: SQLAlchemy (async)
-- Auth: JWT (access + refresh)
-- Frontend: Vue (Vite)
-- Infra: Docker, Nginx
+Three views:
+- Login page
+- Register page
+- Task list page (authenticated)
 
 ---
 
-# Architecture
+## Steps
 
-- Monolithic backend
-- Feature-based internal structure
-- One database
-- One deployment unit
+### 1. Project Setup
+- Create Vue project with Vite
+- Install axios for API calls
+- Basic folder structure
 
-No microservices.
+### 2. Login Page
+- Email + password form
+- Call POST /api/v1/auth/login
+- Store JWT token
+- Redirect to task list on success
+- Link to register page
 
----
+### 3. Register Page
+- Email + password form
+- Call POST /api/v1/auth/register
+- Redirect to login on success
 
-# Initial Domain (Phase 1)
+### 4. Task List Page
+- Fetch tasks from GET /api/v1/tasks
+- Display tasks in a simple list
+- Add new task form
+- Mark task complete (checkbox)
+- Delete task button
 
-Entities:
-- User
-- Task
-
-Rules:
-- A task belongs to exactly one user
-- Only the owner can read or modify their tasks
-- Tasks can be marked as completed
-
-Out of scope for now:
-- Groups
-- Permissions
-- Sharing
-- Roles
-- Soft deletes
-
----
-
-# Phases
-
-## Phase 0 – Project Bootstrap
-- Backend project scaffold
-- Database connection
-- Basic app configuration
-- Health check endpoint
-
-## Phase 1 – Authentication
-- User registration
-- Login
-- JWT issuance
-- Auth dependency
-
-## Phase 2 – Personal Todos
-- Task model
-- CRUD endpoints
-- Ownership enforcement
+### 5. Auth Guard
+- Redirect to login if no token
+- Attach token to API requests
 
 ---
 
-# Constraints
-
-- Keep each phase reviewable in isolation
-- No over-engineering
-- Prefer clarity over abstractions
-- Avoid adding features outside current phase
-
----
-
-# Workflow Rules (Important)
-
-- Work phase by phase
-- One vertical slice at a time
-- Claude implements only the current phase
-- Changes must be readable in under 10 minutes
-- Claude must NOT commit changes
+## Out of Scope
+- Fancy styling
+- State management (Pinia)
+- Error toasts
+- Loading spinners
 
 ---
 
-# Output Expectations
-
-For each phase:
-- Implement only the scoped items
-- Summarize changes
-- List files modified
-- Suggest a commit message
+## Current Step
+Not started.
