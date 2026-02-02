@@ -1,7 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import LoginView from '../views/LoginView.vue'
 
 const routes = [
-  // Routes will be added in subsequent steps
+  { path: '/', redirect: '/login' },
+  { path: '/login', component: LoginView },
 ]
 
 const router = createRouter({
