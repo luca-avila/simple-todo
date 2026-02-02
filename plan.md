@@ -54,4 +54,4 @@ Three views:
 ---
 
 ## Current Step
-Step 2 complete. Ready for Step 3 (Register Page).
+Step 3 complete. Ready for Step 4 (Task List Page).
