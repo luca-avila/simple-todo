@@ -54,4 +54,4 @@ Three views:
 ---
 
 ## Current Step
-Step 3 complete. Ready for Step 4 (Task List Page).
+Step 4 complete. Ready for Step 5 (Auth Guard).
