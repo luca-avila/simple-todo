@@ -54,4 +54,4 @@ Three views:
 ---
 
 ## Current Step
-Step 4 complete. Ready for Step 5 (Auth Guard).
+Step 5 complete. All steps done!
