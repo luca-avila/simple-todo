@@ -9,8 +9,8 @@ Goal: Make `docker compose up` fully functional for the entire stack.
 - ✅ `docker-compose.yml` exists with `db` and `backend` services
 - ✅ `backend/Dockerfile` exists
 - ✅ `.env.example` exists
-- ❌ Frontend is not containerized
-- ❌ No reverse proxy configuration
+- ✅ Frontend containerized (Dockerfile + nginx)
+- ✅ Reverse proxy configured (nginx proxies /api to backend)
 - ✅ CORS not needed (nginx proxies API requests, same-origin)
 - ✅ `.env` file created
 
@@ -90,8 +90,8 @@ Goal: Make `docker compose up` fully functional for the entire stack.
 1. [x] Phase 1.1 - Create .env file
 2. [x] Phase 2.1 - Create frontend Dockerfile
 3. [x] Phase 2.2 - Create frontend nginx.conf
-4. [ ] Phase 2.3 - Verify frontend API configuration
-5. [ ] Phase 3.1 - Add frontend service to docker-compose.yml
+4. [x] Phase 2.3 - Verify frontend API configuration
+5. [x] Phase 3.1 - Add frontend service to docker-compose.yml
 6. [ ] Phase 3.2 - Add healthchecks
 7. [ ] Test with `docker compose up --build`
 
