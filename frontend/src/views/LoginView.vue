@@ -8,9 +8,11 @@ const router = useRouter()
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const loading = ref(false)
 
 async function handleSubmit() {
   error.value = ''
+  loading.value = true
   try {
     const response = await api.post('/auth/login', {
       email: email.value,
@@ -21,12 +23,14 @@ async function handleSubmit() {
     router.push('/tasks')
   } catch (e) {
     error.value = e.response?.data?.detail || 'Login failed'
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <div class="login-container">
+  <div class="auth-container">
     <h1>Login</h1>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
@@ -36,6 +40,7 @@ async function handleSubmit() {
           v-model="email"
           type="email"
           required
+          :disabled="loading"
         />
       </div>
       <div class="form-group">
@@ -45,61 +50,18 @@ async function handleSubmit() {
           v-model="password"
           type="password"
           required
+          :disabled="loading"
         />
       </div>
       <p v-if="error" class="error">{{ error }}</p>
-      <button type="submit">Login</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Logging in...' : 'Login' }}
+      </button>
     </form>
-    <p class="register-link">
+    <p class="auth-link">
       Don't have an account? <router-link to="/register">Register</router-link>
     </p>
   </div>
 </template>
 
-<style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #555;
-}
-
-.error {
-  color: red;
-  margin-bottom: 10px;
-}
-
-.register-link {
-  margin-top: 15px;
-  text-align: center;
-}
-</style>
+<style src="../auth.css"></style>

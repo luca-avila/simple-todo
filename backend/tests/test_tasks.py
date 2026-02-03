@@ -44,7 +44,9 @@ async def test_create_task_unauthenticated(client: AsyncClient):
 async def test_list_tasks_empty(client: AsyncClient, auth_headers):
     response = await client.get("/api/v1/tasks/", headers=auth_headers)
     assert response.status_code == 200
-    assert response.json() == []
+    data = response.json()
+    assert data["items"] == []
+    assert data["total"] == 0
 
 
 async def test_list_tasks(client: AsyncClient, auth_headers, test_user, db: AsyncSession):
@@ -56,9 +58,29 @@ async def test_list_tasks(client: AsyncClient, auth_headers, test_user, db: Asyn
     response = await client.get("/api/v1/tasks/", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 2
-    titles = {t["title"] for t in data}
+    assert len(data["items"]) == 2
+    assert data["total"] == 2
+    titles = {t["title"] for t in data["items"]}
     assert titles == {"Task 1", "Task 2"}
+
+
+async def test_list_tasks_pagination(
+    client: AsyncClient,
+    auth_headers,
+    test_user,
+    db: AsyncSession,
+):
+    for i in range(5):
+        db.add(Task(title=f"Task {i}", owner_id=test_user.id))
+    await db.commit()
+
+    response = await client.get("/api/v1/tasks/?skip=2&limit=2", headers=auth_headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data["items"]) == 2
+    assert data["total"] == 5
+    assert data["skip"] == 2
+    assert data["limit"] == 2
 
 
 async def test_list_tasks_only_own(
@@ -76,8 +98,8 @@ async def test_list_tasks_only_own(
     response = await client.get("/api/v1/tasks/", headers=auth_headers)
     assert response.status_code == 200
     data = response.json()
-    assert len(data) == 1
-    assert data[0]["title"] == "My task"
+    assert len(data["items"]) == 1
+    assert data["items"][0]["title"] == "My task"
 
 
 async def test_get_task(client: AsyncClient, auth_headers, test_user, db: AsyncSession):

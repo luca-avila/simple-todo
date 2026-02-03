@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.task import Task
 from app.models.user import User
-from app.schemas.task import TaskCreate, TaskResponse, TaskUpdate
+from app.schemas.task import TaskCreate, TaskListResponse, TaskResponse, TaskUpdate
 
 router = APIRouter(prefix="/api/v1/tasks", tags=["tasks"])
 
@@ -28,15 +28,27 @@ async def create_task(
     return task
 
 
-@router.get("/", response_model=list[TaskResponse])
+@router.get("/", response_model=TaskListResponse)
 async def list_tasks(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    result = await db.execute(
-        select(Task).where(Task.owner_id == current_user.id)
+    total_result = await db.execute(
+        select(func.count()).select_from(Task).where(Task.owner_id == current_user.id)
     )
-    return result.scalars().all()
+    total = total_result.scalar()
+
+    result = await db.execute(
+        select(Task)
+        .where(Task.owner_id == current_user.id)
+        .offset(skip)
+        .limit(limit)
+    )
+    items = result.scalars().all()
+
+    return TaskListResponse(items=items, total=total, skip=skip, limit=limit)
 
 
 @router.get("/{task_id}", response_model=TaskResponse)

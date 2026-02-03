@@ -20,3 +20,10 @@ class TaskResponse(BaseModel):
     owner_id: int
 
     model_config = {"from_attributes": True}
+
+
+class TaskListResponse(BaseModel):
+    items: list[TaskResponse]
+    total: int
+    skip: int
+    limit: int

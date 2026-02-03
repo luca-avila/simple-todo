@@ -34,6 +34,14 @@ async def test_register_invalid_email(client: AsyncClient):
     assert response.status_code == 422
 
 
+async def test_register_short_password(client: AsyncClient):
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={"email": "new@example.com", "password": "short"},
+    )
+    assert response.status_code == 422
+
+
 async def test_login_success(client: AsyncClient, test_user):
     response = await client.post(
         "/api/v1/auth/login",

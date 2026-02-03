@@ -15,9 +15,22 @@ const router = createRouter({
   routes,
 })
 
+function isTokenExpired(token) {
+  if (!token) return true
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.exp * 1000 < Date.now()
+  } catch {
+    return true
+  }
+}
+
 router.beforeEach((to) => {
-  if (to.meta.requiresAuth && !localStorage.getItem('access_token')) {
-    return '/login'
+  if (to.meta.requiresAuth) {
+    const token = localStorage.getItem('access_token')
+    if (!token || isTokenExpired(token)) {
+      return '/login'
+    }
   }
 })
 
