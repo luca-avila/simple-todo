@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.database import Base, engine
@@ -18,6 +19,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Simple Todo API", version="0.1.0", lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Vite dev server
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(auth.router)
 app.include_router(tasks.router)
 
@@ -29,6 +38,9 @@ async def health_check():
 
 @app.get("/health/db")
 async def health_check_db():
-    async with engine.connect() as conn:
-        await conn.execute(text("SELECT 1"))
-    return {"status": "healthy", "database": "connected"}
+    try:
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception:
+        return {"status": "unhealthy", "database": "disconnected"}

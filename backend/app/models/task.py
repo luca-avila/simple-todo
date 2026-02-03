@@ -14,8 +14,3 @@ class Task(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     owner: Mapped["User"] = relationship(back_populates="tasks")
-
-
-from app.models.user import User
-
-User.tasks = relationship("Task", back_populates="owner", cascade="all, delete-orphan")

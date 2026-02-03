@@ -9,22 +9,30 @@ const tasks = ref([])
 const newTaskTitle = ref('')
 const newTaskDescription = ref('')
 const error = ref('')
+const loading = ref(false)
+const adding = ref(false)
 
 async function fetchTasks() {
+  loading.value = true
+  error.value = ''
   try {
     const response = await api.get('/tasks')
-    tasks.value = response.data
+    tasks.value = response.data.items
   } catch (e) {
     if (e.response?.status === 401) {
       router.push('/login')
     } else {
       error.value = 'Failed to fetch tasks'
     }
+  } finally {
+    loading.value = false
   }
 }
 
 async function addTask() {
   if (!newTaskTitle.value.trim()) return
+  adding.value = true
+  error.value = ''
   try {
     const payload = { title: newTaskTitle.value }
     if (newTaskDescription.value.trim()) {
@@ -36,10 +44,13 @@ async function addTask() {
     newTaskDescription.value = ''
   } catch (e) {
     error.value = 'Failed to add task'
+  } finally {
+    adding.value = false
   }
 }
 
 async function toggleComplete(task) {
+  error.value = ''
   try {
     const response = await api.patch(`/tasks/${task.id}`, { completed: !task.completed })
     task.completed = response.data.completed
@@ -49,6 +60,7 @@ async function toggleComplete(task) {
 }
 
 async function deleteTask(task) {
+  error.value = ''
   try {
     await api.delete(`/tasks/${task.id}`)
     tasks.value = tasks.value.filter(t => t.id !== task.id)
@@ -79,18 +91,24 @@ onMounted(fetchTasks)
         type="text"
         placeholder="Task title..."
         required
+        :disabled="adding"
       />
       <input
         v-model="newTaskDescription"
         type="text"
         placeholder="Description (optional)"
+        :disabled="adding"
       />
-      <button type="submit">Add</button>
+      <button type="submit" :disabled="adding">
+        {{ adding ? 'Adding...' : 'Add' }}
+      </button>
     </form>
 
     <p v-if="error" class="error">{{ error }}</p>
 
-    <ul class="task-list">
+    <p v-if="loading" class="loading">Loading tasks...</p>
+
+    <ul v-else class="task-list">
       <li v-for="task in tasks" :key="task.id" class="task-item">
         <input
           type="checkbox"
@@ -105,7 +123,7 @@ onMounted(fetchTasks)
       </li>
     </ul>
 
-    <p v-if="tasks.length === 0" class="empty">No tasks yet</p>
+    <p v-if="!loading && tasks.length === 0" class="empty">No tasks yet</p>
   </div>
 </template>
 
@@ -200,5 +218,19 @@ onMounted(fetchTasks)
 .empty {
   text-align: center;
   color: #888;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+input:disabled {
+  background: #f5f5f5;
 }
 </style>

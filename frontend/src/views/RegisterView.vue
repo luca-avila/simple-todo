@@ -8,9 +8,11 @@ const router = useRouter()
 const email = ref('')
 const password = ref('')
 const error = ref('')
+const loading = ref(false)
 
 async function handleSubmit() {
   error.value = ''
+  loading.value = true
   try {
     await api.post('/auth/register', {
       email: email.value,
@@ -19,12 +21,14 @@ async function handleSubmit() {
     router.push('/login')
   } catch (e) {
     error.value = e.response?.data?.detail || 'Registration failed'
+  } finally {
+    loading.value = false
   }
 }
 </script>
 
 <template>
-  <div class="register-container">
+  <div class="auth-container">
     <h1>Register</h1>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
@@ -34,6 +38,7 @@ async function handleSubmit() {
           v-model="email"
           type="email"
           required
+          :disabled="loading"
         />
       </div>
       <div class="form-group">
@@ -43,61 +48,26 @@ async function handleSubmit() {
           v-model="password"
           type="password"
           required
+          minlength="8"
+          :disabled="loading"
         />
+        <small>Minimum 8 characters</small>
       </div>
       <p v-if="error" class="error">{{ error }}</p>
-      <button type="submit">Register</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Registering...' : 'Register' }}
+      </button>
     </form>
-    <p class="login-link">
+    <p class="auth-link">
       Already have an account? <router-link to="/login">Login</router-link>
     </p>
   </div>
 </template>
 
+<style src="../auth.css"></style>
 <style scoped>
-.register-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background: #333;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #555;
-}
-
-.error {
-  color: red;
-  margin-bottom: 10px;
-}
-
-.login-link {
-  margin-top: 15px;
-  text-align: center;
+small {
+  color: #666;
+  font-size: 0.85em;
 }
 </style>
