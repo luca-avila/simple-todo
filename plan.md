@@ -92,7 +92,7 @@ Goal: Make `docker compose up` fully functional for the entire stack.
 3. [x] Phase 2.2 - Create frontend nginx.conf
 4. [x] Phase 2.3 - Verify frontend API configuration
 5. [x] Phase 3.1 - Add frontend service to docker-compose.yml
-6. [ ] Phase 3.2 - Add healthchecks
+6. [x] Phase 3.2 - Add healthchecks
 7. [ ] Test with `docker compose up --build`
 
 ---
