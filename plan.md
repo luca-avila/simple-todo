@@ -1,141 +1,39 @@
-# Docker Setup Completion Plan
+# Production Readiness Plan
 
-Goal: Make `docker compose up` fully functional for the entire stack.
-
----
-
-## Current State
-
-- ✅ `docker-compose.yml` exists with `db` and `backend` services
-- ✅ `backend/Dockerfile` exists
-- ✅ `.env.example` exists
-- ✅ Frontend containerized (Dockerfile + nginx)
-- ✅ Reverse proxy configured (nginx proxies /api to backend)
-- ✅ CORS not needed (nginx proxies API requests, same-origin)
-- ✅ `.env` file created
+Improvements needed before deploying to VPS.
 
 ---
 
-## Phase 1: Environment Configuration
+## 1. SSL/TLS with Nginx
 
-### 1.1 Create .env file
-- Copy `.env.example` to `.env`
-- Update `SECRET_KEY` to a secure random value
-- Ensure `DATABASE_URL` uses the Docker service name (`db`) instead of `localhost`
+- Configure HTTPS on the VPS nginx (outside Docker)
+- Obtain certificates via Let's Encrypt / Certbot
+- Proxy `https://yourdomain.com` → `http://localhost:3000` (frontend container)
 
----
+## 2. Production Docker Compose Override
 
-## Phase 2: Frontend Containerization
-
-### 2.1 Create frontend Dockerfile
-- **File:** `frontend/Dockerfile`
-- Multi-stage build:
-  - **Stage 1 (build):** Node.js image to run `npm install` and `npm run build`
-  - **Stage 2 (serve):** Nginx Alpine to serve the built static files
-- Copy built files from stage 1 to nginx html directory
-
-### 2.2 Create nginx config for frontend
-- **File:** `frontend/nginx.conf`
-- Serve static files from `/usr/share/nginx/html`
-- Handle SPA routing (fallback to `index.html` for Vue Router)
-- Proxy `/api` requests to the backend service
-
-### 2.3 Verify frontend API configuration
-- **File:** `frontend/src/api/index.js`
-- Ensure `baseURL` works in both development and production
-- Use relative `/api/v1` path (nginx will proxy to backend)
-
----
-
-## Phase 3: Docker Compose Updates
-
-### 3.1 Add frontend service
-- **File:** `docker-compose.yml`
-- Add `frontend` service:
-  - Build from `./frontend`
-  - Expose port 80 (or 3000)
-  - Depends on `backend`
-
-### 3.2 Update service dependencies
-- Ensure proper startup order: `db` → `backend` → `frontend`
-- Add healthchecks for `db` and `backend` services
-
-### 3.3 Configure networking
-- All services on same Docker network (default)
-- Frontend nginx proxies to `backend:8000`
-- Backend connects to `db:5432`
-
----
-
-## Phase 4: Production Readiness (Optional)
-
-### 4.1 Add dedicated nginx reverse proxy
-- Single entry point for the application
-- SSL/TLS termination (with certificates)
-
-### 4.2 Add healthcheck endpoints
-- Backend: Add `/health` endpoint
-- Database: Use pg_isready
-
-### 4.3 Add production docker-compose override
 - **File:** `docker-compose.prod.yml`
-- Remove development volumes
+- Remove development volumes (`./backend:/app`)
+- Remove `--reload` from uvicorn command
 - Set `DEBUG=false`
-- Configure resource limits
+- Restrict exposed ports (no need to expose 8000 and 5432 externally)
+
+## 3. Database Backups
+
+- Set up periodic `pg_dump` via cron on the VPS
+- Store backups off-server (S3, rsync, etc.)
+
+## 4. Environment Security
+
+- Use strong, unique `SECRET_KEY` per environment
+- Don't commit `.env` to git (already in `.gitignore`)
+- Change default PostgreSQL credentials for production
 
 ---
 
-## Implementation Checklist
+## Checklist
 
-1. [x] Phase 1.1 - Create .env file
-2. [x] Phase 2.1 - Create frontend Dockerfile
-3. [x] Phase 2.2 - Create frontend nginx.conf
-4. [x] Phase 2.3 - Verify frontend API configuration
-5. [x] Phase 3.1 - Add frontend service to docker-compose.yml
-6. [x] Phase 3.2 - Add healthchecks
-7. [ ] Test with `docker compose up --build`
-
----
-
-## Expected Final Structure
-
-```
-simple-todo/
-├── docker-compose.yml          # Updated with frontend service
-├── .env                        # Created from .env.example
-├── .env.example
-├── backend/
-│   └── Dockerfile              # Existing
-└── frontend/
-    ├── Dockerfile              # NEW
-    ├── nginx.conf              # NEW
-    └── src/
-        └── api/
-            └── index.js        # Verified/updated
-```
-
----
-
-## Verification Steps
-
-After implementation, verify with:
-
-```bash
-# Build and start all services
-docker compose up --build
-
-# Check all containers are running
-docker compose ps
-
-# Test backend API
-curl http://localhost:8000/api/v1/
-
-# Test frontend (served by nginx)
-curl http://localhost:3000
-
-# Full flow test:
-# 1. Open http://localhost:3000 in browser
-# 2. Register a new user
-# 3. Login
-# 4. Create/edit/delete tasks
-```
+1. [ ] Set up VPS with nginx + certbot
+2. [ ] Create `docker-compose.prod.yml`
+3. [ ] Configure database backups
+4. [ ] Harden environment variables
