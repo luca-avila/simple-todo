@@ -16,7 +16,7 @@ async function fetchTasks() {
   loading.value = true
   error.value = ''
   try {
-    const response = await api.get('/tasks')
+    const response = await api.get('/tasks/')
     tasks.value = response.data.items
   } catch (e) {
     if (e.response?.status === 401) {
@@ -38,7 +38,7 @@ async function addTask() {
     if (newTaskDescription.value.trim()) {
       payload.description = newTaskDescription.value
     }
-    const response = await api.post('/tasks', payload)
+    const response = await api.post('/tasks/', payload)
     tasks.value.push(response.data)
     newTaskTitle.value = ''
     newTaskDescription.value = ''
